@@ -1,0 +1,11 @@
+<h1>Template</h1>
+
+<ul>
+{{range .Templates}}
+<li><h5>{{.Title}}</h5>
+<p>{{printf "%s" .Body}}</p>
+</li>
+{{end}}
+</ul>
+
+

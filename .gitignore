@@ -22,3 +22,10 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# uploaded images directory
+img/*
+
+# project files
+reddit-top.go.sublime-project
+reddit-top.go.sublime-workspace
