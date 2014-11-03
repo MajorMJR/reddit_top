@@ -1,8 +1,9 @@
 {{range .Images}}
 <p>{{.Title}}</p>
-<img src="../img/{{.Filename}}">
+<a href="../img/{{.Filename}}">
+	<img src="../img/resized/{{.Filename}}">
+</a>
 {{end}}
-
 
 <form action="/reddit/" method="POST">
 
