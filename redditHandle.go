@@ -5,17 +5,20 @@ import (
 	"github.com/jzelinskie/reddit"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	//"reflect"
 )
 
 type Image struct {
-	URL   string
-	Title string
+	URL      string
+	Title    string
+	Filename string
 }
 
-func listImages(subreddit string) []Image {
+func listImagesDl(subreddit string) []Image {
 	session, err := reddit.NewLoginSession("imgdl", "testing123", "GO BOT")
 	if err != nil {
 		fmt.Println(err)
@@ -29,23 +32,52 @@ func listImages(subreddit string) []Image {
 	images := []Image{}
 
 	for _, k := range submissions {
-		image := Image{
-			URL:   k.URL,
-			Title: k.Title,
+		if k.URL[len(k.URL)-4:] == ".jpg" {
+			//fmt.Println("this is a jpeg", k.URL)
+			imgFilename := strings.Replace(k.Title, " ", "_", -1)
+			image := Image{
+				URL:      k.URL,
+				Title:    k.Title,
+				Filename: imgFilename,
+			}
+			if err != nil {
+				//fmt.Println(err)
+			}
+			images = append(images, image)
 		}
-		images = append(images, image)
+
 	}
 
 	return images
 }
 
-func saveImages(w http.ResponseWriter, images []Image, subreddit string) error {
-	for _, img := range images {
-		filename := "img/dl_" + img.Title
-		if _, err := os.Stat(filename); err == nil {
-			fmt.Println("file already exists: ", filename)
+func loadImages() ([]Image, error) {
+	images_file := []Image{}
+
+	files, _ := ioutil.ReadDir("./img")
+	for _, f := range files {
+		imgURL := "img/" + f.Name()
+		imgTitle := strings.Replace(f.Name(), "_", " ", -1)
+		image := Image{
+			URL:      imgURL,
+			Title:    imgTitle[3:],
+			Filename: f.Name(),
 		}
-		output, err := os.Create(filename)
+		images_file = append(images_file, image)
+	}
+
+	return images_file, nil
+}
+
+func downloadImages(w http.ResponseWriter, images []Image, subreddit string) error {
+
+	for _, img := range images {
+		imgFilename := "img/dl_" + strings.Replace(img.Title, " ", "_", -1)
+		if _, err := os.Stat(imgFilename); err == nil {
+			fmt.Println("file already exists: ", imgFilename)
+			return err
+		}
+		output, err := os.Create(imgFilename)
 
 		reqImg, err := http.Get(img.URL)
 		if err != nil {
@@ -56,19 +88,13 @@ func saveImages(w http.ResponseWriter, images []Image, subreddit string) error {
 		n, err := io.Copy(output, reqImg.Body)
 		fmt.Println(n, "bytes downloaded")
 	}
+	return nil
 }
 
 func RedditHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := reddit.NewLoginSession("Injunire", "mitjamroo", "GO BOT")
-	if err != nil {
-		fmt.Println(err)
-	}
-	//fmt.Println(reflect.TypeOf(session))
-	submissions, _ := session.SubredditSubmissions("earthporn")
-
-	images := listImages("earthporn")
-
-	saveImages(w, images, "earthporn")
+	//image_files := listImagesDl("earthporn")
+	//downloadImages(w, image_files, "earthporn")
+	image_files, _ := loadImages()
 
 	//fmt.Println(images)
 	t, err := template.ParseFiles("tmpl/reddit.html")
@@ -76,6 +102,6 @@ func RedditHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	t.Execute(w, map[string]interface{}{
-		"Submissions": submissions,
+		"Images": image_files,
 	})
 }

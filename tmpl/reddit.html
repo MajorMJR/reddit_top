@@ -1,3 +1,10 @@
-{{range .Submissions}}
+{{range .Images}}
 <p>{{.Title}}</p>
+<img src="../img/{{.Filename}}">
 {{end}}
+
+
+<form action="/reddit/" method="POST">
+
+<div><input type="submit" value="Save"></div>
+</form>
