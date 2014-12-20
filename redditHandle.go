@@ -68,7 +68,7 @@ func listImagesDl(subreddit string) []Image {
 			images = append(images, image)
 		}
 	}
-
+	fmt.Println(images)
 	return images
 }
 
@@ -84,7 +84,7 @@ func downloadImages(w http.ResponseWriter, images []Image, subreddit string) ([]
 			continue
 		}
 		output, err := os.Create(imgFilename)
-
+		fmt.Println(img.URL)
 		reqImg, err := http.Get(img.URL)
 		if err != nil {
 			fmt.Println(err)
