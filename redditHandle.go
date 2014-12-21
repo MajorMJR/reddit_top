@@ -26,6 +26,11 @@ type User struct {
 }
 
 func (u *User) loginReddit() (*reddit.LoginSession, error) {
+	u = User{
+		Username:  "imgdl",
+		Password:  "testing123",
+		Useragent: "GO BOT",
+	}
 	session, err := reddit.NewLoginSession(u.Username, u.Password, u.Useragent)
 	if err != nil {
 		fmt.Println(err)
@@ -41,13 +46,9 @@ func listImagesDl(subreddit string) []Image {
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
-	user := User{
-		Username:  "imgdl",
-		Password:  "testing123",
-		Useragent: "GO BOT",
-	}
-	Session, _ := user.loginReddit()
-	submissions, err := Session.SubredditSubmissions(subreddit)
+	user := User{}
+	session, _ := user.loginReddit()
+	submissions, err := session.SubredditSubmissions(subreddit)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -94,6 +95,7 @@ func downloadImages(w http.ResponseWriter, images []Image, subreddit string) ([]
 		n, err := io.Copy(output, reqImg.Body)
 		fmt.Println(n, "bytes downloaded")
 	}
+	resizeImages(images)
 	return images, nil
 }
 
@@ -111,7 +113,6 @@ func loadImages() ([]Image, error) {
 		}
 		images_struct = append(images_struct, image)
 	}
-	resizeImages(images_struct)
 	return images_struct, nil
 }
 
