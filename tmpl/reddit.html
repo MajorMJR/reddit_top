@@ -1,5 +1,7 @@
-<p>download images <a href="/reddit/">here.</a></p>
-
+<html>
+<form action="/reddit/">
+    <input type="submit" value="Download new images">
+</form>
 {{range .Images}}
 <p>{{.Title}}</p>
 <a href="../img/{{.Filename}}">
@@ -11,3 +13,4 @@
 
 <div><input type="submit" value="Save"></div>
 </form>
+</html>

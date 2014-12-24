@@ -25,7 +25,7 @@ type User struct {
 	Useragent string
 }
 
-func (u *User) loginReddit() (*reddit.LoginSession, error) {
+func (u User) loginReddit() (*reddit.LoginSession, error) {
 	u = User{
 		Username:  "imgdl",
 		Password:  "testing123",
@@ -95,7 +95,6 @@ func downloadImages(w http.ResponseWriter, images []Image, subreddit string) ([]
 		n, err := io.Copy(output, reqImg.Body)
 		fmt.Println(n, "bytes downloaded")
 	}
-	resizeImages(images)
 	return images, nil
 }
 
@@ -127,7 +126,7 @@ func resizeImages(images []Image) error {
 			fmt.Println("end of images", i)
 			return nil
 		}
-		filename := "img/" + img.Filename
+		filename := "img/dl_" + img.Filename
 
 		resizeImg(filename)
 	}
@@ -135,9 +134,9 @@ func resizeImages(images []Image) error {
 }
 
 func redditHandler(w http.ResponseWriter, r *http.Request) {
-
 	image_files := listImagesDl("earthporn")
 	downloadImages(w, image_files, "earthporn")
+	resizeImages(image_files)
 	image_files, _ = loadImages()
 
 	//fmt.Println(images)
